@@ -7,8 +7,7 @@ import SwiftGraphQL
 
 /// Extensions to the core implementation that connect SwiftGraphQL's Selection to the execution
 /// mechanisms of the client.
-extension GraphQLClient {
-    
+public extension GraphQLClient {
     /// Turns selection into a request operation.
     private func createRequestOperation<T, TypeLock>(
         for selection: Selection<T, TypeLock>,
@@ -29,7 +28,7 @@ extension GraphQLClient {
     // MARK: - Executors
     
     /// Executes a query against the client and returns a publisher that emits values from relevant exchanges.
-    public func executeQuery<T, TypeLock>(
+    func executeQuery<T, TypeLock>(
         for selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
         url request: URLRequest? = nil,
@@ -45,7 +44,7 @@ extension GraphQLClient {
     }
     
     /// Executes a mutation against the client and returns a publisher that emits values from relevant exchanges.
-    public func executeMutation<T, TypeLock>(
+    func executeMutation<T, TypeLock>(
         for selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
         url request: URLRequest? = nil,
@@ -61,7 +60,7 @@ extension GraphQLClient {
     }
     
     /// Executes a mutation against the client and returns a publisher that emits values from relevant exchanges.
-    public func executeSubscription<T, TypeLock>(
+    func executeSubscription<T, TypeLock>(
         of selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
         url request: URLRequest? = nil,
@@ -78,9 +77,8 @@ extension GraphQLClient {
     
     // MARK: - Decoders
     
-    
     /// Executes a query and returns a stream of decoded values.
-    public func query<T, TypeLock>(
+    func query<T, TypeLock>(
         _ selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
         request: URLRequest? = nil,
@@ -92,7 +90,7 @@ extension GraphQLClient {
     }
     
     /// Executes a mutation and returns a stream of decoded values.
-    public func mutate<T, TypeLock>(
+    func mutate<T, TypeLock>(
         _ selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
         request: URLRequest? = nil,
@@ -104,7 +102,7 @@ extension GraphQLClient {
     }
     
     /// Creates a subscription stream of decoded values from the given query.
-    public func subscribe<T, TypeLock>(
+    func subscribe<T, TypeLock>(
         to selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
         request: URLRequest? = nil,
@@ -116,22 +114,35 @@ extension GraphQLClient {
     }
 }
 
-extension OperationResult {
-    
+fileprivate extension OperationResult {
     /// Decodes data in operation result using the selection decoder.
-    fileprivate func decode<T, TypeLock>(
+    func decode<T, TypeLock>(
         selection: Selection<T, TypeLock>
     ) throws -> DecodedOperationResult<T> {
-        let data = try selection.decode(raw: self.data)
-        
-        let result = DecodedOperationResult(
-            operation: self.operation,
-            data: data,
-            errors: self.errors,
-            stale: self.stale
-        )
-        
-        return result
+        if self.data == nil && !self.errors.isEmpty {
+            throw CombinedError.combined(errors)
+        }
+
+        do {
+            let data = try selection.decode(raw: self.data)
+
+            let result = DecodedOperationResult(
+                operation: self.operation,
+                data: data,
+                errors: self.errors,
+                stale: self.stale
+            )
+
+            return result
+        } catch {
+            if self.errors.isEmpty {
+                throw error
+            } else {
+                var errors = self.errors
+                errors.append(.parsing(error))
+                throw CombinedError.combined(errors)
+            }
+        }
     }
 }
 #endif

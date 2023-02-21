@@ -4,7 +4,6 @@ import GraphQL
 
 /// Operation describes a single request that may be processed by multiple exchange along the chain.
 public struct Operation: Identifiable, Equatable, Hashable {
-    
     /// Unique identifier used to identify an operation.
     public var id: String
     
@@ -27,7 +26,6 @@ public struct Operation: Identifiable, Equatable, Hashable {
     public var policy: Policy
     
     public enum Policy: String {
-        
         /// Prefers cached results and falls back to sending an API request when there are no prior results.
         case cacheFirst = "cache-first"
         
@@ -58,7 +56,6 @@ public struct Operation: Identifiable, Equatable, Hashable {
 }
 
 extension Operation {
-    
     /// Returns an operation that is exactly the same as the current one and has
     /// an updated kind value.
     func with(kind: Operation.Kind) -> Operation {
@@ -102,10 +99,8 @@ public struct OperationResult: Equatable {
     }
 }
 
-
 /// An error structure describing an error that may have happened in one of the exchanges.
 public enum CombinedError: Error {
-    
     /// Describes an error that occured on the networking layer.
     case network(URLError)
     
@@ -117,6 +112,9 @@ public enum CombinedError: Error {
     
     /// An error occured and it's not clear why.
     case unknown(Error)
+    
+    /// Combines different kinds of errors into one
+    indirect case combined([CombinedError])
 }
 
 extension CombinedError: Equatable {
@@ -132,7 +130,6 @@ extension CombinedError: Equatable {
     }
 }
 
-
 extension OperationResult {
     /// Changes the `stale` value fo the operation result on a copy of the current instance.
     func with(stale: Bool) -> OperationResult {
@@ -143,7 +140,6 @@ extension OperationResult {
 }
 
 extension OperationResult: Identifiable {
-    
     /// Id of the operation related to this result.
     public var id: String {
         self.operation.id
@@ -155,7 +151,6 @@ extension OperationResult: Identifiable {
 /// - NOTE: Decoded result may include errors from invalid data even if
 ///         the response query was correct.
 public struct DecodedOperationResult<T> {
-    
     /// Back-reference to the operation that triggered the execution.
     public var operation: Operation
     
@@ -168,4 +163,3 @@ public struct DecodedOperationResult<T> {
     /// Tells wether the result of the query is ot up-to-date.
     public var stale: Bool?
 }
-

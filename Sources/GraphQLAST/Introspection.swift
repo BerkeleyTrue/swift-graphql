@@ -126,7 +126,7 @@ public func parse(_ data: Data) throws -> Schema {
 // MARK: - Internals
 
 /// Represents a GraphQL response.
-private struct Reponse<T: Decodable>: Decodable {
+public struct Reponse<T: Decodable>: Decodable {
     public let data: T
 }
 
@@ -185,7 +185,7 @@ func fetch(from endpoint: URL, withHeaders headers: [String: String] = [:]) thro
             semaphore.signal()
             return
         }
-        
+
         guard (200 ... 299).contains(httpResponse.statusCode) else {
             result = .failure(.statusCode(httpResponse.statusCode))
             semaphore.signal()
@@ -214,16 +214,16 @@ func fetch(from endpoint: URL, withHeaders headers: [String: String] = [:]) thro
 }
 
 public enum IntrospectionError: Error {
-    
+
     /// There was an error during the execution.
     case error(Error)
-    
+
     /// Request received a bad status code from the server.
     case statusCode(Int)
-    
+
     /// We don;t know what caused the error, but something unexpected happened.
     case unknown
-    
+
     /// Error that signifies that there's no content at the provided file path.
     case emptyfile
 }
@@ -231,7 +231,7 @@ public enum IntrospectionError: Error {
 // MARK: - Extension
 
 public extension Schema {
-    
+
     /// Downloads a schema from the provided endpoint or a local file.
     ///
     /// - NOTE: The function is going to load from the local path if the URL is missing a scheme or has a `file` scheme.
@@ -243,7 +243,7 @@ public extension Schema {
         } else {
             introspection = try fetch(from: endpoint, withHeaders: headers)
         }
-        
+
         self = try parse(introspection)
     }
 }
