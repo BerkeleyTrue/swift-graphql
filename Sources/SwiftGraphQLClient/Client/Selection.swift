@@ -130,7 +130,7 @@ fileprivate extension OperationResult {
                 operation: self.operation,
                 data: data,
                 errors: self.errors,
-                stale: self.stale
+                stale: self.stale,
                 extensions: self.extensions
             )
 
