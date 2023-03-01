@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 import GraphQL
+import Logging
 
 /// Protocol that outlines methods that are required by FetchExchange to operate as expected.
 ///
@@ -21,7 +22,6 @@ public protocol FetchSession {
 /// FetchExchange should be put at the end of the exchange pipeline. It filters out query and mutation operations
 /// that it's processing and doesn't forward them to the next exchange in the pipeline chain.
 public class FetchExchange: Exchange {
-    
     /// Structure used to connect to the server.
     private var session: FetchSession
     
@@ -91,7 +91,13 @@ public class FetchExchange: Exchange {
                                 )
                             }
                             
-                            return OperationResult(operation: operation, data: result.data, errors: [], stale: false)
+                            return OperationResult(
+                                operation: operation,
+                                data: result.data,
+                                errors: [],
+                                stale: false,
+                                extensions: result.extensions
+                            )
                         } catch(let err) {
                             return OperationResult(
                                 operation: operation,
