@@ -167,4 +167,7 @@ public struct DecodedOperationResult<T> {
     
     /// Tells wether the result of the query is ot up-to-date.
     public var stale: Bool?
+    
+    /// Extensions received from the server.
+    public let extensions: [String: AnyCodable]?
 }

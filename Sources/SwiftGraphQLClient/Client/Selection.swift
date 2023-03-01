@@ -131,6 +131,7 @@ fileprivate extension OperationResult {
                 data: data,
                 errors: self.errors,
                 stale: self.stale
+                extensions: self.extensions
             )
 
             return result
